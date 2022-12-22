@@ -15,7 +15,11 @@
     "url": "git+https://github.com/shelfio/postgres-local.git"
   },
   "license": "MIT",
-  "author": "Dmytro Harazdovskyi",
+  "author": {
+    "name": "Dmytro Harazdovskyi",
+    "email": "dmytro.harazdovskyi@shelf.io",
+    "url": "shelf.io"
+  },
   "files": [
     "lib"
   ],
