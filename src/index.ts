@@ -12,21 +12,16 @@ const FILEPATH_PREFIX = `${cwd()}/node_modules/.cache/@shelf/postgres-local`;
 
 type StartESOptions = {
   seedPath?: string;
-  version?: string;
+  version?: number;
 };
 
 export async function start(options: StartESOptions): Promise<string> {
-  const {seedPath, version = '14'} = options;
+  const {seedPath, version = 14} = options;
 
   const url = 'postgres://localhost:5432/postgres';
 
   try {
-    await asyncExec(`
-          ${getInstallationScript(version)}
-          mkdir ${FILEPATH_PREFIX}/data;
-          initdb -D ${FILEPATH_PREFIX}/data;
-          pg_ctl -D ${FILEPATH_PREFIX}/data -l logfile start;
-        `);
+    await asyncExec(getInstallationScript(version));
 
     debug('Connecting to postgres...');
     const sql = postgres(url);
@@ -46,17 +41,19 @@ export async function start(options: StartESOptions): Promise<string> {
   }
 }
 
-export async function stop(): Promise<{stdout: string; stderr: string}> {
-  return asyncExec(`
-      pg_ctl stop -D ${FILEPATH_PREFIX}/data
-      rm -rf ${FILEPATH_PREFIX}
-  `);
+export async function stop(version?: string): Promise<{stdout: string; stderr: string}> {
+  return asyncExec(getStopScript(version));
 }
 
-export function getInstallationScript(version: string): string {
+export function getInstallationScript(version: number): string {
   switch (platform()) {
     case 'darwin': {
-      return `brew install postgresql@${version}`;
+      return `
+        brew install postgresql@${version}
+        mkdir -p ${FILEPATH_PREFIX}/data;
+        initdb -D ${FILEPATH_PREFIX}/data;
+        pg_ctl -D ${FILEPATH_PREFIX}/data -l logfile start;
+      `;
     }
     case 'win32': {
       throw new Error('Unsupported OS, try run on OS X or Linux');
@@ -65,6 +62,26 @@ export function getInstallationScript(version: string): string {
       return `
         apt-get update
         apt-get install -y postgresql-${version}
+        mkdir -p ${FILEPATH_PREFIX}/data;
+        /usr/lib/postgresql/${version}/bin/initdb -D ${FILEPATH_PREFIX}/data;
+        /usr/lib/postgresql/${version}/bin/pg_ctl -D ${FILEPATH_PREFIX}/data -l logfile start;
+      `;
+    }
+  }
+}
+
+export function getStopScript(version?: string): string {
+  switch (platform()) {
+    case 'darwin': {
+      return `
+         pg_ctl stop -D ${FILEPATH_PREFIX}/data
+         rm -rf ${FILEPATH_PREFIX}
+      `;
+    }
+    default: {
+      return `
+        /usr/lib/postgresql/${version}/bin/pg_ctl -D ${FILEPATH_PREFIX}/data
+        rm -rf ${FILEPATH_PREFIX}
       `;
     }
   }
