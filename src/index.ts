@@ -52,7 +52,7 @@ export function getInstallationScript(version: number): string {
         brew install postgresql@${version}
         mkdir -p ${FILEPATH_PREFIX}/data;
         initdb -D ${FILEPATH_PREFIX}/data;
-        pg_ctl -D ${FILEPATH_PREFIX}/data -l logfile start;
+        pg_ctl -D ${FILEPATH_PREFIX}/data -l ${FILEPATH_PREFIX}/logfile start;
       `;
     }
     case 'win32': {
@@ -64,7 +64,7 @@ export function getInstallationScript(version: number): string {
         apt-get install -y postgresql-${version}
         mkdir -p ${FILEPATH_PREFIX}/data;
         /usr/lib/postgresql/${version}/bin/initdb -D ${FILEPATH_PREFIX}/data;
-        /usr/lib/postgresql/${version}/bin/pg_ctl -D ${FILEPATH_PREFIX}/data -l logfile start;
+        /usr/lib/postgresql/${version}/bin/pg_ctl -D ${FILEPATH_PREFIX}/data -l ${FILEPATH_PREFIX}logfile start;
       `;
     }
   }
