@@ -10,20 +10,23 @@
 $ yarn add @shelf/postgres-local --dev
 ```
 
-### 1. Start Postgres - TO BE DONE
+### 1. Start Postgres
 
 ```js
 import {start} from '@shelf/postgres-local';
 
-await start({});
+await start({
+  seedPath: "schema.sql",
+  version: 14
+});
 ```
 
-### 2. Stop Postgres - TO BE DONE
+### 2. Stop Postgres
 
 ```js
 import {stop} from '@shelf/postgres-local';
 
-stop();
+await stop(14);
 ```
 
 ## Publish
