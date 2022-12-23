@@ -41,7 +41,7 @@ export async function start(options: StartESOptions): Promise<string> {
   }
 }
 
-export async function stop(version?: string): Promise<{stdout: string; stderr: string}> {
+export async function stop(version = 14): Promise<{stdout: string; stderr: string}> {
   return asyncExec(getStopScript(version));
 }
 
@@ -70,7 +70,7 @@ export function getInstallationScript(version: number): string {
   }
 }
 
-export function getStopScript(version?: string): string {
+export function getStopScript(version = 14): string {
   switch (platform()) {
     case 'darwin': {
       return `
