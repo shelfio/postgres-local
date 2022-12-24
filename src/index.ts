@@ -75,7 +75,6 @@ export function getInstallationScript({version = 14, useSudo = false}): string {
       return `
         ${prefix} apt update;
         ${prefix} apt install postgresql-${version};
-        sudo su postgres
         ${prefix} mkdir -p ${FILEPATH_PREFIX}/data;
         ${prefix} /usr/lib/postgresql/${version}/bin/initdb -D ${FILEPATH_PREFIX}/data;
         ${prefix} /usr/lib/postgresql/${version}/bin/pg_ctl -D ${FILEPATH_PREFIX}/data -l ${FILEPATH_PREFIX}logfile start;
