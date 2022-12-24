@@ -1,9 +1,8 @@
 import getDebug from 'debug';
-import {exec} from 'child_process';
+import {spawnSync} from 'child_process';
 import postgres from 'postgres';
-import {promisify} from 'util';
-
-const asyncExec = promisify(exec);
+// import {promisify} from 'util';
+// const asyncExec = promisify(exec);
 import cwd from 'cwd';
 import {platform} from 'os';
 
@@ -20,7 +19,14 @@ export async function start(options: {
   const url = 'postgres://localhost:5432/postgres';
 
   try {
-    await asyncExec(getInstallationScript({version, useSudo}));
+    await spawnSync(getInstallationScript({version, useSudo}), {
+      stdio: 'inherit',
+      shell: true,
+      env: {
+        ...process.env,
+        HOME: '/root',
+      },
+    });
 
     debug('Connecting to postgres...');
     const sql = postgres(url);
@@ -40,14 +46,15 @@ export async function start(options: {
   }
 }
 
-export async function stop({
-  version = 14,
-  useSudo = false,
-}: {
-  version?: number;
-  useSudo?: boolean;
-}): Promise<{stdout: string; stderr: string}> {
-  return asyncExec(getStopScript({version, useSudo}));
+export function stop({version = 14, useSudo = false}: {version?: number; useSudo?: boolean}): any {
+  return spawnSync(getStopScript({version, useSudo}), {
+    stdio: 'inherit',
+    shell: true,
+    env: {
+      ...process.env,
+      HOME: '/root',
+    },
+  });
 }
 
 export function getInstallationScript({version = 14, useSudo = false}): string {
@@ -68,6 +75,7 @@ export function getInstallationScript({version = 14, useSudo = false}): string {
       return `
         ${prefix} apt update;
         ${prefix} apt install postgresql-${version};
+        sudo su postgres
         ${prefix} mkdir -p ${FILEPATH_PREFIX}/data;
         ${prefix} /usr/lib/postgresql/${version}/bin/initdb -D ${FILEPATH_PREFIX}/data;
         ${prefix} /usr/lib/postgresql/${version}/bin/pg_ctl -D ${FILEPATH_PREFIX}/data -l ${FILEPATH_PREFIX}logfile start;
