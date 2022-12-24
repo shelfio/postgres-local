@@ -10,18 +10,17 @@ import {platform} from 'os';
 const debug = getDebug('postgres-local');
 const FILEPATH_PREFIX = `${cwd()}/node_modules/.cache/@shelf/postgres-local`;
 
-type StartESOptions = {
+export async function start(options: {
   seedPath?: string;
   version?: number;
-};
-
-export async function start(options: StartESOptions): Promise<string> {
-  const {seedPath, version = 14} = options;
+  useSudo?: boolean;
+}): Promise<string> {
+  const {seedPath, version = 14, useSudo = false} = options;
 
   const url = 'postgres://localhost:5432/postgres';
 
   try {
-    await asyncExec(getInstallationScript(version));
+    await asyncExec(getInstallationScript({version, useSudo}));
 
     debug('Connecting to postgres...');
     const sql = postgres(url);
@@ -41,18 +40,25 @@ export async function start(options: StartESOptions): Promise<string> {
   }
 }
 
-export async function stop(version = 14): Promise<{stdout: string; stderr: string}> {
-  return asyncExec(getStopScript(version));
+export async function stop({
+  version = 14,
+  useSudo = false,
+}: {
+  version?: number;
+  useSudo?: boolean;
+}): Promise<{stdout: string; stderr: string}> {
+  return asyncExec(getStopScript({version, useSudo}));
 }
 
-export function getInstallationScript(version: number): string {
+export function getInstallationScript({version = 14, useSudo = false}): string {
+  const prefix = useSudo ? 'sudo' : '';
   switch (platform()) {
     case 'darwin': {
       return `
-        brew install postgresql@${version}
-        mkdir -p ${FILEPATH_PREFIX}/data;
-        initdb -D ${FILEPATH_PREFIX}/data;
-        pg_ctl -D ${FILEPATH_PREFIX}/data -l ${FILEPATH_PREFIX}/logfile start;
+        ${prefix} brew install postgresql@${version};
+        ${prefix} mkdir -p ${FILEPATH_PREFIX}/data;
+        ${prefix} initdb -D ${FILEPATH_PREFIX}/data;
+        ${prefix} pg_ctl -D ${FILEPATH_PREFIX}/data -l ${FILEPATH_PREFIX}/logfile start;
       `;
     }
     case 'win32': {
@@ -60,28 +66,29 @@ export function getInstallationScript(version: number): string {
     }
     default: {
       return `
-        apt-get update
-        apt-get install -y postgresql-${version}
-        mkdir -p ${FILEPATH_PREFIX}/data;
-        /usr/lib/postgresql/${version}/bin/initdb -D ${FILEPATH_PREFIX}/data;
-        /usr/lib/postgresql/${version}/bin/pg_ctl -D ${FILEPATH_PREFIX}/data -l ${FILEPATH_PREFIX}logfile start;
+        ${prefix} apt update;
+        ${prefix} apt install postgresql-${version};
+        ${prefix} mkdir -p ${FILEPATH_PREFIX}/data;
+        ${prefix} /usr/lib/postgresql/${version}/bin/initdb -D ${FILEPATH_PREFIX}/data;
+        ${prefix} /usr/lib/postgresql/${version}/bin/pg_ctl -D ${FILEPATH_PREFIX}/data -l ${FILEPATH_PREFIX}logfile start;
       `;
     }
   }
 }
 
-export function getStopScript(version = 14): string {
+export function getStopScript({version = 14, useSudo = false}): string {
+  const prefix = useSudo ? 'sudo' : '';
   switch (platform()) {
     case 'darwin': {
       return `
-         pg_ctl stop -D ${FILEPATH_PREFIX}/data
-         rm -rf ${FILEPATH_PREFIX}
+         ${prefix} pg_ctl stop -D ${FILEPATH_PREFIX}/data
+         ${prefix} rm -rf ${FILEPATH_PREFIX}
       `;
     }
     default: {
       return `
-        /usr/lib/postgresql/${version}/bin/pg_ctl -D ${FILEPATH_PREFIX}/data
-        rm -rf ${FILEPATH_PREFIX}
+        ${prefix} /usr/lib/postgresql/${version}/bin/pg_ctl -D ${FILEPATH_PREFIX}/data
+        ${prefix} rm -rf ${FILEPATH_PREFIX}
       `;
     }
   }

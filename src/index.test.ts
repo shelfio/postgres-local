@@ -52,7 +52,7 @@ describe('#postgres', () => {
   });
 
   it('should stop postgres@14 locally', async () => {
-    await stop();
+    await stop({});
     try {
       const sql = postgres('postgres://localhost:5432/postgres');
 
