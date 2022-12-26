@@ -70,7 +70,8 @@ export function getInstallationScript({version = 14, port = 5555}): string {
         sudo -u postgres mkdir -p ${PD_TEMP_DATA_PATH}/data;
         sudo -u postgres /usr/lib/postgresql/${version}/bin/initdb -D ${PD_TEMP_DATA_PATH}/data;
         sudo -u postgres /usr/lib/postgresql/${version}/bin/pg_ctl -o "-F -p ${port}" -D ${PD_TEMP_DATA_PATH}/data -l ${PD_TEMP_DATA_PATH}/logfile start;
-        sudo -u postgres createdb $(whoami); createdb $(whoami)
+        sudo -u postgres createuser -p ${port} -s $(whoami);
+        sudo -u postgres createdb -p ${port} $(whoami);
       `;
     }
   }
