@@ -1,12 +1,10 @@
 import getDebug from 'debug';
 import {spawnSync} from 'child_process';
 import postgres from 'postgres';
-import cwd from 'cwd';
 import {platform} from 'os';
 
 const debug = getDebug('postgres-local');
-const MACOS_TEMP_FILEPATH = `${cwd()}/node_modules/.cache/@shelf/postgres-local`;
-// const LINUX_TEMP_FILEPATH = '/postgres-local';
+const PD_TEMP_DATA_PATH = `/tmp/postgres-local`;
 
 export async function start(options: {
   seedPath?: string;
@@ -57,9 +55,9 @@ export function getInstallationScript({version = 14, port = 5555}): string {
     case 'darwin': {
       return `
        brew install postgresql@${version};
-       mkdir -p ${MACOS_TEMP_FILEPATH}/data;
-       initdb -D ${MACOS_TEMP_FILEPATH}/data;
-       pg_ctl -D ${MACOS_TEMP_FILEPATH}/data -o "-F -p ${port}" -l ${MACOS_TEMP_FILEPATH}/logfile start;
+       mkdir -p ${PD_TEMP_DATA_PATH}/data;
+       initdb -D ${PD_TEMP_DATA_PATH}/data;
+       pg_ctl -D ${PD_TEMP_DATA_PATH}/data -o "-F -p ${port}" -l ${PD_TEMP_DATA_PATH}/logfile start;
       `;
     }
     case 'win32': {
@@ -67,12 +65,11 @@ export function getInstallationScript({version = 14, port = 5555}): string {
     }
     default: {
       return `
-        sudo service postgresql stop;
         apt update;
         apt install postgresql-${version};
-        sudo -u postgres mkdir -p ~/postgres-local/data;
-        sudo -u postgres /usr/lib/postgresql/${version}/bin/initdb -D ~/postgres-local/data;
-        sudo -u postgres /usr/lib/postgresql/${version}/bin/pg_ctl -o "-F -p ${port}" -D ~/postgres-local/data -l ~/postgres-local/logfile start;
+        sudo -u postgres mkdir -p ${PD_TEMP_DATA_PATH}/data;
+        sudo -u postgres /usr/lib/postgresql/${version}/bin/initdb -D ${PD_TEMP_DATA_PATH}/data;
+        sudo -u postgres /usr/lib/postgresql/${version}/bin/pg_ctl -o "-F -p ${port}" -D ${PD_TEMP_DATA_PATH}/data -l ${PD_TEMP_DATA_PATH}/logfile start;
       `;
     }
   }
@@ -82,14 +79,14 @@ export function getStopScript({version = 14}): string {
   switch (platform()) {
     case 'darwin': {
       return `
-         pg_ctl stop -D ${MACOS_TEMP_FILEPATH}/data
-         rm -rf ${MACOS_TEMP_FILEPATH}
+         pg_ctl stop -D ${PD_TEMP_DATA_PATH}/data
+         rm -rf ${PD_TEMP_DATA_PATH}
       `;
     }
     default: {
       return `
-        sudo -u postgres /usr/lib/postgresql/${version}/bin/pg_ctl stop -D ~/postgres-local/data
-        sudo -u postgres rm -rf ~/postgres-local/
+        sudo -u postgres /usr/lib/postgresql/${version}/bin/pg_ctl stop -D ${PD_TEMP_DATA_PATH}/data
+        sudo -u postgres rm -rf ${PD_TEMP_DATA_PATH}
       `;
     }
   }
