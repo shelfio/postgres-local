@@ -5,9 +5,11 @@ import {start, stop} from '.';
 
 describe('#postgres', () => {
   it('should start postgres@14 locally', async () => {
+    expect.assertions(2);
+
     const returnedUrl = await start({seedPath: `${cwd()}/src/schema.sql`});
 
-    const sql = postgres('postgres://localhost:5432/postgres');
+    const sql = postgres(returnedUrl);
 
     const data = await sql`
       SELECT attname, format_type(atttypid, atttypmod)
@@ -47,8 +49,7 @@ describe('#postgres', () => {
         format_type: 'boolean',
       },
     ]);
-
-    expect(returnedUrl).toEqual('postgres://localhost:5432/postgres');
+    expect(returnedUrl).toEqual('postgres://localhost:5555/postgres');
   });
 
   it('should stop postgres@14 locally', async () => {
