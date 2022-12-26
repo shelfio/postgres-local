@@ -65,8 +65,8 @@ export function getInstallationScript({version = 14, port = 5555}): string {
     }
     default: {
       return `
-        apt update;
-        apt install postgresql-${version};
+        sudo apt update;
+        sudo apt install postgresql-${version};
         sudo -u postgres mkdir -p ${PD_TEMP_DATA_PATH}/data;
         sudo -u postgres /usr/lib/postgresql/${version}/bin/initdb -D ${PD_TEMP_DATA_PATH}/data;
         sudo -u postgres /usr/lib/postgresql/${version}/bin/pg_ctl -o "-F -p ${port}" -D ${PD_TEMP_DATA_PATH}/data -l ${PD_TEMP_DATA_PATH}/logfile start;
