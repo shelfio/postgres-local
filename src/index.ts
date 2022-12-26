@@ -1,25 +1,24 @@
 import getDebug from 'debug';
 import {spawnSync} from 'child_process';
 import postgres from 'postgres';
-// import {promisify} from 'util';
-// const asyncExec = promisify(exec);
 import cwd from 'cwd';
 import {platform} from 'os';
 
 const debug = getDebug('postgres-local');
-const FILEPATH_PREFIX = `${cwd()}/node_modules/.cache/@shelf/postgres-local`;
+const MACOS_TEMP_FILEPATH = `${cwd()}/node_modules/.cache/@shelf/postgres-local`;
+// const LINUX_TEMP_FILEPATH = '/postgres-local';
 
 export async function start(options: {
   seedPath?: string;
   version?: number;
-  useSudo?: boolean;
+  port?: number;
 }): Promise<string> {
-  const {seedPath, version = 14, useSudo = false} = options;
+  const {seedPath, version = 14, port = 5555} = options;
 
-  const url = 'postgres://localhost:5432/postgres';
+  const url = `postgres://localhost:${port}/postgres`;
 
   try {
-    await spawnSync(getInstallationScript({version, useSudo}), {
+    await spawnSync(getInstallationScript({version}), {
       stdio: 'inherit',
       shell: true,
       env: {
@@ -46,26 +45,21 @@ export async function start(options: {
   }
 }
 
-export function stop({version = 14, useSudo = false}: {version?: number; useSudo?: boolean}): any {
-  return spawnSync(getStopScript({version, useSudo}), {
+export function stop({version = 14}: {version?: number; useSudo?: boolean}): any {
+  return spawnSync(getStopScript({version}), {
     stdio: 'inherit',
     shell: true,
-    env: {
-      ...process.env,
-      HOME: '/root',
-    },
   });
 }
 
-export function getInstallationScript({version = 14, useSudo = false}): string {
-  const prefix = useSudo ? 'sudo' : '';
+export function getInstallationScript({version = 14, port = 5555}): string {
   switch (platform()) {
     case 'darwin': {
       return `
-        ${prefix} brew install postgresql@${version};
-        ${prefix} mkdir -p ${FILEPATH_PREFIX}/data;
-        ${prefix} initdb -D ${FILEPATH_PREFIX}/data;
-        ${prefix} pg_ctl -D ${FILEPATH_PREFIX}/data -l ${FILEPATH_PREFIX}/logfile start;
+       brew install postgresql@${version};
+       mkdir -p ${MACOS_TEMP_FILEPATH}/data;
+       initdb -D ${MACOS_TEMP_FILEPATH}/data;
+       pg_ctl -D ${MACOS_TEMP_FILEPATH}/data -o "-F -p ${port}" -l ${MACOS_TEMP_FILEPATH}/logfile start;
       `;
     }
     case 'win32': {
@@ -73,29 +67,29 @@ export function getInstallationScript({version = 14, useSudo = false}): string {
     }
     default: {
       return `
-        ${prefix} apt update;
-        ${prefix} apt install postgresql-${version};
-        ${prefix} mkdir -p ${FILEPATH_PREFIX}/data;
-        ${prefix} /usr/lib/postgresql/${version}/bin/initdb -D ${FILEPATH_PREFIX}/data;
-        ${prefix} /usr/lib/postgresql/${version}/bin/pg_ctl -D ${FILEPATH_PREFIX}/data -l ${FILEPATH_PREFIX}logfile start;
+        sudo service postgresql stop;
+        apt update;
+        apt install postgresql-${version};
+        sudo -u postgres mkdir -p ~/postgres-local/data;
+        sudo -u postgres /usr/lib/postgresql/${version}/bin/initdb -D ~/postgres-local/data;
+        sudo -u postgres /usr/lib/postgresql/${version}/bin/pg_ctl -o "-F -p ${port}" -D ~/postgres-local/data -l ~/postgres-local/logfile start;
       `;
     }
   }
 }
 
-export function getStopScript({version = 14, useSudo = false}): string {
-  const prefix = useSudo ? 'sudo' : '';
+export function getStopScript({version = 14}): string {
   switch (platform()) {
     case 'darwin': {
       return `
-         ${prefix} pg_ctl stop -D ${FILEPATH_PREFIX}/data
-         ${prefix} rm -rf ${FILEPATH_PREFIX}
+         pg_ctl stop -D ${MACOS_TEMP_FILEPATH}/data
+         rm -rf ${MACOS_TEMP_FILEPATH}
       `;
     }
     default: {
       return `
-        ${prefix} /usr/lib/postgresql/${version}/bin/pg_ctl -D ${FILEPATH_PREFIX}/data
-        ${prefix} rm -rf ${FILEPATH_PREFIX}
+        sudo -u postgres /usr/lib/postgresql/${version}/bin/pg_ctl stop -D ~/postgres-local/data
+        sudo -u postgres rm -rf ~/postgres-local/
       `;
     }
   }
