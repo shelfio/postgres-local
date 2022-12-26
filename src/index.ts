@@ -10,13 +10,14 @@ export async function start(options: {
   seedPath?: string;
   version?: number;
   port?: number;
+  includeInstallation?: boolean;
 }): Promise<string> {
-  const {seedPath, version = 14, port = 5555} = options;
+  const {seedPath, version = 14, port = 5555, includeInstallation = false} = options;
 
   const url = `postgres://localhost:${port}/postgres`;
 
   try {
-    await spawnSync(getInstallationScript({version}), {
+    spawnSync(getInstallationScript({version, port, includeInstallation}), {
       stdio: 'inherit',
       shell: true,
       env: {
@@ -50,11 +51,17 @@ export function stop({version = 14}: {version?: number; useSudo?: boolean}): any
   });
 }
 
-export function getInstallationScript({version = 14, port = 5555}): string {
+export function getInstallationScript({
+  version = 14,
+  port = 5555,
+  includeInstallation: includeInstallation = false,
+}): string {
   switch (platform()) {
     case 'darwin': {
+      const installation = includeInstallation ? `brew install postgresql@${version};` : '';
+
       return `
-       brew install postgresql@${version};
+       ${installation}
        mkdir -p ${PD_TEMP_DATA_PATH}/data;
        initdb -D ${PD_TEMP_DATA_PATH}/data;
        pg_ctl -D ${PD_TEMP_DATA_PATH}/data -o "-F -p ${port}" -l ${PD_TEMP_DATA_PATH}/logfile start;
@@ -64,9 +71,11 @@ export function getInstallationScript({version = 14, port = 5555}): string {
       throw new Error('Unsupported OS, try run on OS X or Linux');
     }
     default: {
+      // eslint-disable-next-line
+      const installation = includeInstallation ? `sudo apt update; sudo apt install postgresql-${version};` : '';
+
       return `
-        sudo apt update;
-        sudo apt install postgresql-${version};
+        ${installation};
         sudo -u postgres mkdir -p ${PD_TEMP_DATA_PATH}/data;
         sudo -u postgres /usr/lib/postgresql/${version}/bin/initdb -D ${PD_TEMP_DATA_PATH}/data;
         sudo -u postgres /usr/lib/postgresql/${version}/bin/pg_ctl -o "-F -p ${port}" -D ${PD_TEMP_DATA_PATH}/data -l ${PD_TEMP_DATA_PATH}/logfile start;
