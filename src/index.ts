@@ -4,7 +4,7 @@ import postgres from 'postgres';
 import {platform} from 'os';
 
 const debug = getDebug('postgres-local');
-const PD_TEMP_DATA_PATH = `/tmp/postgres-local`;
+const PD_TEMP_DATA_PATH = `/tmp/postgres-local${Date.now()}`;
 
 export async function start(options: {
   seedPath?: string;
