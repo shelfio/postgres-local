@@ -17,17 +17,25 @@ import {start} from '@shelf/postgres-local';
 
 await start({
   seedPath: "schema.sql",
-  version: 14
+  version: 14,
+  port: 5555,
+  includeInstallation: true
 });
 ```
+ - `seedPath` - absolute path to sql file with commands that will set up db structure before tests
+ - `includeInstallation`
+   - when this flag is `true` (default) macOS will run `brew install` and linux `apt install` to make sure `postgres` is installed
+   - when false - package omit installing postgres and relly that it is already in place
 
 ### 2. Stop Postgres
 
 ```js
 import {stop} from '@shelf/postgres-local';
 
-await stop(14);
+await stop({version: 14});
 ```
+
+
 
 ## Publish
 

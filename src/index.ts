@@ -44,8 +44,8 @@ export async function start(options: {
   }
 }
 
-export function stop({version = 14}: {version?: number; useSudo?: boolean}): any {
-  return spawnSync(getStopScript({version}), {
+export function stop({version = 14}: {version?: number}): void {
+  spawnSync(getStopScript({version}), {
     stdio: 'inherit',
     shell: true,
   });
