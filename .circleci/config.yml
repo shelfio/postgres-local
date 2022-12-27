@@ -23,7 +23,8 @@ jobs:
   build:
     executor:
       name: node/default
-      tag: <<pipeline.parameters.node_version>>-browsers
+      tag: <<pipeline.parameters.node_version>>
+    working_directory: ~/repo
     steps:
       - checkout
       - install_deps
