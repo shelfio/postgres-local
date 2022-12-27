@@ -4,7 +4,7 @@ import postgres from 'postgres';
 import {start, stop} from '.';
 
 describe('#postgres', () => {
-  it('should start postgres@14 locally', async () => {
+  it('should start postgres locally', async () => {
     expect.assertions(2);
 
     const returnedUrl = await start({
@@ -56,7 +56,7 @@ describe('#postgres', () => {
     expect(returnedUrl).toEqual('postgres://localhost:5555/postgres');
   });
 
-  it('should stop postgres@14 locally', async () => {
+  it('should stop postgres locally', async () => {
     await stop({
       version: 12,
     });
