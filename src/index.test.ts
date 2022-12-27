@@ -7,7 +7,11 @@ describe('#postgres', () => {
   it('should start postgres@14 locally', async () => {
     expect.assertions(2);
 
-    const returnedUrl = await start({seedPath: `${cwd()}/src/schema.sql`});
+    const returnedUrl = await start({
+      seedPath: `${cwd()}/src/schema.sql`,
+      version: 12,
+      includeInstallation: false,
+    });
 
     const sql = postgres(returnedUrl);
 
