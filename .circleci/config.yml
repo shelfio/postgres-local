@@ -13,7 +13,7 @@ commands:
     steps:
       - node/install-packages:
           pkg-manager: yarn
-          cache-version: v1-all
+#          cache-version: v1-all
           cache-only-lockfile: true
           app-dir: ~/repo
           override-ci-command: yarn install --pure-lockfile --no-progress
@@ -22,6 +22,7 @@ jobs:
   build:
     docker:
       - image: cimg/postgres:14.6
+      - image: cimg/node:16.18.1
     executor:
       name: node/default
       tag: <<pipeline.parameters.node_version>>
