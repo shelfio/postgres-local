@@ -1,30 +1,37 @@
 import getDebug from 'debug';
-import {spawnSync} from 'child_process';
+import type {ExecSyncOptions} from 'child_process';
+import {execSync} from 'child_process';
 import postgres from 'postgres';
 import {platform} from 'os';
 
 const debug = getDebug('postgres-local');
-const PD_TEMP_DATA_PATH = `/tmp/postgres-local}`;
+const PD_TEMP_DATA_PATH = `/tmp/postgres-local`;
 
 export async function start(options: {
   seedPath?: string;
   version?: number;
   port?: number;
   includeInstallation?: boolean;
+  debugMode: boolean;
 }): Promise<string> {
-  const {seedPath, version = 14, port = 5555, includeInstallation = false} = options;
+  const {
+    seedPath,
+    version = 14,
+    port = 5555,
+    includeInstallation = false,
+    debugMode = false,
+  } = options;
+
+  const execOptions: ExecSyncOptions = {};
+
+  if (debugMode) {
+    execOptions.stdio = 'inherit';
+  }
 
   const url = `postgres://localhost:${port}/postgres`;
 
   try {
-    spawnSync(getInstallationScript({version, port, includeInstallation}), {
-      stdio: 'inherit',
-      shell: true,
-      env: {
-        ...process.env,
-        HOME: '/root',
-      },
-    });
+    execSync(getInstallationScript({version, port, includeInstallation}), execOptions);
 
     debug('Connecting to postgres...');
     const sql = postgres(url);
@@ -44,11 +51,19 @@ export async function start(options: {
   }
 }
 
-export function stop({version = 14}: {version?: number}): void {
-  spawnSync(getStopScript({version}), {
-    stdio: 'inherit',
-    shell: true,
-  });
+export function stop({
+  version = 14,
+  debugMode = false,
+}: {
+  version?: number;
+  debugMode: boolean;
+}): void {
+  const execOptions: ExecSyncOptions = {};
+
+  if (debugMode) {
+    execOptions.stdio = 'inherit';
+  }
+  execSync(getStopScript({version}), execOptions);
 }
 
 export function getInstallationScript({

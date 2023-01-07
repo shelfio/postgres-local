@@ -19,14 +19,15 @@ await start({
   seedPath: "schema.sql",
   version: 14,
   port: 5555,
-  includeInstallation: true
+  includeInstallation: true,
+  debugMode: false
 });
 ```
  - `seedPath` - absolute path to sql file with commands that will set up db structure before tests
  - `includeInstallation`
    - when this flag is `true` (default) macOS will run `brew install` and linux `apt install` to make sure `postgres` is installed
    - when false - package omit installing postgres and relly that it is already in place
-
+ - `debugMode` - used for streaming terminal logs during executing `start` and `stop` methods
 ### 2. Stop Postgres
 
 ```js

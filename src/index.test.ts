@@ -11,6 +11,7 @@ describe('#postgres', () => {
       seedPath: `${cwd()}/src/schema.sql`,
       version: 12,
       includeInstallation: false,
+      debugMode: true,
     });
 
     const sql = postgres(returnedUrl);
@@ -59,6 +60,7 @@ describe('#postgres', () => {
   it('should stop postgres locally', async () => {
     await stop({
       version: 12,
+      debugMode: true,
     });
     try {
       const sql = postgres('postgres://localhost:5555/postgres');
