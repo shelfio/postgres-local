@@ -47,6 +47,7 @@ export async function start(options: {
     return url;
   } catch (e) {
     console.error(e);
+    stop(options);
     throw e;
   }
 }
