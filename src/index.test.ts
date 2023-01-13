@@ -4,6 +4,22 @@ import postgres from 'postgres';
 import {start, stop} from '.';
 
 describe('#postgres', () => {
+  // The order of tests matters here
+  // since plugin should clean up files and rerun correctly even after error occurred after start
+
+  it('should stop postgres and clear files locally if error occurred during start', async () => {
+    try {
+      await start({
+        version: 12,
+        debugMode: true,
+        seedPath: `${cwd()}/src/notExists.sql`,
+      });
+    } catch (e) {
+      // @ts-ignore
+      expect(e.name).toEqual('Error');
+    }
+  });
+
   it('should start postgres locally', async () => {
     expect.assertions(2);
 
