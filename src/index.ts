@@ -1,8 +1,8 @@
-import getDebug from 'debug';
-import type {ExecSyncOptions} from 'child_process';
 import {execSync} from 'child_process';
-import postgres from 'postgres';
 import {platform} from 'os';
+import getDebug from 'debug';
+import postgres from 'postgres';
+import type {ExecSyncOptions} from 'child_process';
 
 const debug = getDebug('postgres-local');
 const PD_TEMP_DATA_PATH = `/tmp/postgres-local`;
