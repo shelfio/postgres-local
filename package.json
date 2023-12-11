@@ -52,7 +52,7 @@
   "dependencies": {
     "cwd": "0.10.0",
     "debug": "4.3.4",
-    "postgres": "3.3.2"
+    "postgres": "3.4.3"
   },
   "devDependencies": {
     "@babel/cli": "7.22.5",
