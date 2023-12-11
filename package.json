@@ -55,8 +55,8 @@
     "postgres": "3.4.3"
   },
   "devDependencies": {
-    "@babel/cli": "7.22.5",
-    "@babel/core": "7.22.5",
+    "@babel/cli": "7.23.4",
+    "@babel/core": "7.23.5",
     "@shelf/babel-config": "1.2.0",
     "@shelf/eslint-config": "2.16.0",
     "@shelf/prettier-config": "1.0.0",
