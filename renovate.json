@@ -1,8 +1,4 @@
 {
-  "extends": ["config:base"],
-  "labels": ["backend"],
-  "ignoreDeps": [
-    "cimg/node",
-    "@types/node"
-  ]
+  "extends": ["github>shelfio/renovate-config"],
+  "labels": ["backend"]
 }
