@@ -63,7 +63,7 @@
     "@shelf/tsconfig": "0.1.0",
     "@types/cwd": "0.10.2",
     "@types/debug": "4.1.12",
-    "@types/jest": "29.5.11",
+    "@types/jest": "29.5.12",
     "@types/node": "16",
     "babel-jest": "29.7.0",
     "eslint": "8.56.0",
