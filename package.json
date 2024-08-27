@@ -6,6 +6,7 @@
     "postgres",
     "postgres local"
   ],
+  "type": "module",
   "homepage": "https://github.com/shelfio/postgres-local#readme",
   "bugs": {
     "url": "https://github.com/shelfio/postgres-local/issues"
