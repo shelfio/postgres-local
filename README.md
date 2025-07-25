@@ -17,7 +17,7 @@ import {start} from '@shelf/postgres-local';
 
 await start({
   seedPath: "schema.sql",
-  version: 14,
+  version: 17,
   port: 5555,
   includeInstallation: true,
   debugMode: false
@@ -33,7 +33,7 @@ await start({
 ```js
 import {stop} from '@shelf/postgres-local';
 
-await stop({version: 14});
+await stop({version: 17});
 ```
 
 
