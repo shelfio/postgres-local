@@ -86,7 +86,7 @@ describe('#postgres', () => {
       await sql`create schema supertest`;
     } catch (e) {
       // @ts-ignore
-      expect(e.name).toEqual('Error');
+      expect(e.code).toEqual('ECONNREFUSED');
     }
   });
 });
