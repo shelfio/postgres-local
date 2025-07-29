@@ -16,7 +16,7 @@ export async function start(options: {
 }): Promise<string> {
   const {
     seedPath,
-    version = 14,
+    version = 17,
     port = 5555,
     includeInstallation = false,
     debugMode = false,
@@ -53,7 +53,7 @@ export async function start(options: {
 }
 
 export function stop({
-  version = 14,
+  version = 17,
   debugMode = false,
 }: {
   version?: number;
@@ -68,7 +68,7 @@ export function stop({
 }
 
 export function getInstallationScript({
-  version = 14,
+  version = 17,
   port = 5555,
   includeInstallation: includeInstallation = false,
 }): string {
@@ -79,8 +79,8 @@ export function getInstallationScript({
       return `
        ${installation}
        mkdir -p ${PD_TEMP_DATA_PATH}/data;
-       initdb -D ${PD_TEMP_DATA_PATH}/data;
-       pg_ctl -D ${PD_TEMP_DATA_PATH}/data -o "-F -p ${port}" -l ${PD_TEMP_DATA_PATH}/logfile start;
+       initdb-${version} -D ${PD_TEMP_DATA_PATH}/data;
+       pg_ctl-${version} -D ${PD_TEMP_DATA_PATH}/data -o "-F -p ${port}" -l ${PD_TEMP_DATA_PATH}/logfile start;
       `;
     }
     case 'win32': {
@@ -102,11 +102,11 @@ export function getInstallationScript({
   }
 }
 
-export function getStopScript({version = 14}): string {
+export function getStopScript({version = 17}): string {
   switch (platform()) {
     case 'darwin': {
       return `
-         pg_ctl stop -D ${PD_TEMP_DATA_PATH}/data
+         pg_ctl-${version} stop -D ${PD_TEMP_DATA_PATH}/data
          rm -rf ${PD_TEMP_DATA_PATH}
       `;
     }

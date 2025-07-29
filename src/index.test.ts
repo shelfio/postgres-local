@@ -3,6 +3,8 @@ import cwd from 'cwd';
 import postgres from 'postgres';
 import {start, stop} from '.';
 
+const PG_VERSION = 17;
+
 describe('#postgres', () => {
   // The order of tests matters here
   // since plugin should clean up files and rerun correctly even after error occurred after start
@@ -10,7 +12,7 @@ describe('#postgres', () => {
   it('should stop postgres and clear files locally if error occurred during start', async () => {
     try {
       await start({
-        version: 12,
+        version: PG_VERSION,
         debugMode: true,
         seedPath: `${cwd()}/src/notExists.sql`,
       });
@@ -25,7 +27,7 @@ describe('#postgres', () => {
 
     const returnedUrl = await start({
       seedPath: `${cwd()}/src/schema.sql`,
-      version: 12,
+      version: PG_VERSION,
       includeInstallation: false,
       debugMode: true,
     });
@@ -75,7 +77,7 @@ describe('#postgres', () => {
 
   it('should stop postgres locally', async () => {
     await stop({
-      version: 12,
+      version: PG_VERSION,
       debugMode: true,
     });
     try {
@@ -84,7 +86,7 @@ describe('#postgres', () => {
       await sql`create schema supertest`;
     } catch (e) {
       // @ts-ignore
-      expect(e.name).toEqual('Error');
+      expect(e.code).toEqual('ECONNREFUSED');
     }
   });
 });
