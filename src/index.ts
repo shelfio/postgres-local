@@ -7,6 +7,13 @@ import type {ExecSyncOptions} from 'child_process';
 const debug = getDebug('postgres-local');
 const PD_TEMP_DATA_PATH = `/tmp/postgres-local`;
 
+function getPostgresBinPath(version: number, binary: 'initdb' | 'pg_ctl'): string {
+  const pgPrefix = `/opt/homebrew/opt/postgresql@${version}/bin`;
+
+  return `${pgPrefix}/${binary}`;
+}
+
+// eslint-disable-next-line complexity
 export async function start(options: {
   seedPath?: string;
   version?: number;
@@ -67,46 +74,76 @@ export function stop({
   execSync(getStopScript({version}), execOptions);
 }
 
+function getMacOSScript({
+  version,
+  port,
+  includeInstallation,
+}: {
+  version: number;
+  port: number;
+  includeInstallation: boolean;
+}): string {
+  const installation = includeInstallation ? `brew install postgresql@${version};` : '';
+  const initdbCmd = getPostgresBinPath(version, 'initdb');
+  const pgCtlCmd = getPostgresBinPath(version, 'pg_ctl');
+
+  return `
+   ${installation}
+   mkdir -p ${PD_TEMP_DATA_PATH}/data;
+   ${initdbCmd} -D ${PD_TEMP_DATA_PATH}/data;
+   ${pgCtlCmd} -D ${PD_TEMP_DATA_PATH}/data -o "-F -p ${port}" -l ${PD_TEMP_DATA_PATH}/logfile start;
+  `;
+}
+
+function getLinuxScript({
+  version,
+  port,
+  includeInstallation,
+}: {
+  version: number;
+  port: number;
+  includeInstallation: boolean;
+}): string {
+  const installationCmd = `sudo apt update; sudo apt install postgresql-${version};`;
+  const installation = includeInstallation ? installationCmd : '';
+
+  return `
+    ${installation}
+    sudo -u postgres mkdir -p ${PD_TEMP_DATA_PATH}/data;
+    sudo -u postgres /usr/lib/postgresql/${version}/bin/initdb -D ${PD_TEMP_DATA_PATH}/data;
+    sudo -u postgres /usr/lib/postgresql/${version}/bin/pg_ctl -o "-F -p ${port}" -D ${PD_TEMP_DATA_PATH}/data -l ${PD_TEMP_DATA_PATH}/logfile start;
+    sudo -u postgres createuser -p ${port} -s $(whoami);
+    sudo -u postgres createdb -p ${port} $(whoami);
+  `;
+}
+
+// eslint-disable-next-line complexity
 export function getInstallationScript({
   version = 17,
   port = 5555,
-  includeInstallation: includeInstallation = false,
+  includeInstallation = false,
+}: {
+  version?: number;
+  port?: number;
+  includeInstallation?: boolean;
 }): string {
   switch (platform()) {
-    case 'darwin': {
-      const installation = includeInstallation ? `brew install postgresql@${version};` : '';
-
-      return `
-       ${installation}
-       mkdir -p ${PD_TEMP_DATA_PATH}/data;
-       initdb-${version} -D ${PD_TEMP_DATA_PATH}/data;
-       pg_ctl-${version} -D ${PD_TEMP_DATA_PATH}/data -o "-F -p ${port}" -l ${PD_TEMP_DATA_PATH}/logfile start;
-      `;
-    }
-    case 'win32': {
+    case 'darwin':
+      return getMacOSScript({version, port, includeInstallation});
+    case 'win32':
       throw new Error('Unsupported OS, try run on OS X or Linux');
-    }
-    default: {
-      // eslint-disable-next-line
-      const installation = includeInstallation ? `sudo apt update; sudo apt install postgresql-${version};` : '';
-
-      return `
-        ${installation}
-        sudo -u postgres mkdir -p ${PD_TEMP_DATA_PATH}/data;
-        sudo -u postgres /usr/lib/postgresql/${version}/bin/initdb -D ${PD_TEMP_DATA_PATH}/data;
-        sudo -u postgres /usr/lib/postgresql/${version}/bin/pg_ctl -o "-F -p ${port}" -D ${PD_TEMP_DATA_PATH}/data -l ${PD_TEMP_DATA_PATH}/logfile start;
-        sudo -u postgres createuser -p ${port} -s $(whoami);
-        sudo -u postgres createdb -p ${port} $(whoami);
-      `;
-    }
+    default:
+      return getLinuxScript({version, port, includeInstallation});
   }
 }
 
 export function getStopScript({version = 17}): string {
   switch (platform()) {
     case 'darwin': {
+      const pgCtlCmd = getPostgresBinPath(version, 'pg_ctl');
+
       return `
-         pg_ctl-${version} stop -D ${PD_TEMP_DATA_PATH}/data
+         ${pgCtlCmd} stop -D ${PD_TEMP_DATA_PATH}/data
          rm -rf ${PD_TEMP_DATA_PATH}
       `;
     }
