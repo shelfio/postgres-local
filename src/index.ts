@@ -105,7 +105,7 @@ function getLinuxScript({
   includeInstallation: boolean;
 }): string {
   const installationCmd = `sudo apt update; sudo apt install postgresql-${version};`;
-  const installation = includeInstallation ? installationCmd : '';
+  const installation = includeInstallation ? `sudo apt update; sudo apt install postgresql-${version};` : '';
 
   return `
     ${installation}
