@@ -7,8 +7,21 @@ import type {ExecSyncOptions} from 'child_process';
 const debug = getDebug('postgres-local');
 const PD_TEMP_DATA_PATH = `/tmp/postgres-local`;
 
+function getHomebrewPrefix(): string {
+  try {
+    // Use execSync to get the Homebrew prefix, trim to remove newline
+    return execSync('brew --prefix', {encoding: 'utf8'}).trim();
+  } catch (error) {
+    console.error(error);
+    throw new Error(
+      'Homebrew is not installed or not found in PATH. Please install Homebrew to use this tool.'
+    );
+  }
+}
+
 function getPostgresBinPath(version: number, binary: 'initdb' | 'pg_ctl'): string {
-  const pgPrefix = `/opt/homebrew/opt/postgresql@${version}/bin`;
+  const brewPrefix = getHomebrewPrefix();
+  const pgPrefix = `${brewPrefix}/opt/postgresql@${version}/bin`;
 
   return `${pgPrefix}/${binary}`;
 }
@@ -104,8 +117,11 @@ function getLinuxScript({
   port: number;
   includeInstallation: boolean;
 }): string {
-  const installationCmd = `sudo apt update; sudo apt install postgresql-${version};`;
-  const installation = includeInstallation ? `sudo apt update; sudo apt install postgresql-${version};` : '';
+  let installation = '';
+
+  if (includeInstallation) {
+    installation = `sudo apt update; sudo apt install postgresql-${version};`;
+  }
 
   return `
     ${installation}
