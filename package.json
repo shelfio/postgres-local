@@ -1,6 +1,6 @@
 {
   "name": "@shelf/postgres-local",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Run Postgres locally",
   "keywords": [
     "postgres",
