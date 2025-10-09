@@ -1,6 +1,6 @@
 {
   "name": "@shelf/postgres-local",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Run Postgres locally",
   "keywords": [
     "postgres",
@@ -14,6 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/shelfio/postgres-local.git"
   },
+  "type": "module",
   "license": "MIT",
   "author": {
     "name": "Dmytro Harazdovskyi",
@@ -23,12 +24,24 @@
   "files": [
     "lib"
   ],
-  "main": "lib/index.js",
+  "main": "./lib/cjs/index.cjs",
+  "module": "./lib/esm/index.js",
   "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/esm/index.js",
+      "require": "./lib/cjs/index.cjs",
+      "default": "./lib/esm/index.js"
+    }
+  },
   "scripts": {
-    "build": "rm -rf lib/ && yarn build:types && yarn build:code",
-    "build:code": "babel src --out-dir lib --ignore '**/*.test.ts' --extensions '.ts' && find ./lib -name '*.test.d.ts' -delete",
+    "build": "rm -rf lib/ && yarn build:types && yarn clean:test-dts && yarn build:code",
+    "build:code": "yarn build:cjs && yarn build:esm",
+    "build:cjs": "babel src --out-dir lib/cjs --ignore '**/*.test.ts' --extensions '.ts' --out-file-extension '.cjs'",
+    "build:esm": "tsc --project tsconfig.esm.json",
     "build:types": "tsc --emitDeclarationOnly --declaration --isolatedModules false --declarationDir lib",
+    "clean:test-dts": "find ./lib -name '*.test.d.ts' -delete",
     "coverage": "yarn test --coverage",
     "lint": "eslint . --ext .js,.ts,.json --fix",
     "lint:ci": "eslint . --ext .js,.ts,.json",
