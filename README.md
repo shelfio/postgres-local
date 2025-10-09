@@ -12,8 +12,24 @@ $ yarn add @shelf/postgres-local --dev
 
 ### 1. Start Postgres
 
+#### ES Modules
+
 ```js
 import {start} from '@shelf/postgres-local';
+
+await start({
+  seedPath: "schema.sql",
+  version: 17,
+  port: 5555,
+  includeInstallation: true,
+  debugMode: false
+});
+```
+
+#### CommonJS
+
+```js
+const {start} = require('@shelf/postgres-local');
 
 await start({
   seedPath: "schema.sql",
