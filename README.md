@@ -1,5 +1,9 @@
 # postgres-local [![CircleCI](https://dl.circleci.com/status-badge/img/gh/shelfio/postgres-local/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/shelfio/postgres-local/tree/master) ![](https://img.shields.io/badge/code_style-prettier-ff69b4.svg) [![npm (scoped)](https://img.shields.io/npm/v/@shelf/postgres-local.svg)](https://www.npmjs.com/package/@shelf/postgres-local)
 
+> **Archived:** This project is no longer maintained. The local PostgreSQL runtime now lives in
+> [jest-postgres](https://github.com/shelfio/jest-postgres). Existing npm releases remain
+> available.
+
 > Run any version of Postgres locally
 
 ## Usage
